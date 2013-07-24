@@ -652,10 +652,15 @@ trait Results {
      * @param content The content to send.
      */
     def apply[C](content: C)(implicit writeable: Writeable[C]): SimpleResult = {
-      SimpleResult(
-        ResponseHeader(status, writeable.contentType.map(ct => Map(CONTENT_TYPE -> ct)).getOrElse(Map.empty)),
-        Enumerator(writeable.transform(content))
-      )
+      val (enumerator, contentLength) = writeable.enumeratorFor(content)
+      val headers = (contentLength, writeable.contentType) match {
+        case (Some(length), Some(ct)) => Map(CONTENT_TYPE -> ct, CONTENT_LENGTH -> length.toString)
+        case (Some(length), None) => Map(CONTENT_LENGTH -> length.toString)
+        case (None, Some(ct)) => Map(CONTENT_TYPE -> ct)
+        case _ => Map.empty[String, String]
+      }
+
+      SimpleResult(ResponseHeader(status, headers), enumerator)
     }
 
     /**

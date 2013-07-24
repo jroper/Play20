@@ -5,7 +5,7 @@ import java.util.concurrent.atomic.AtomicReference
 import scala.concurrent.{ Future, Promise }
 import play.api.libs.iteratee._
 import play.api.libs.iteratee.Input._
-import play.api.http.{ Writeable, ContentTypeOf }
+import play.api.http.Writeable
 import com.ning.http.client.{
   AsyncHttpClient,
   AsyncHttpClientConfig,
@@ -380,7 +380,7 @@ object WS {
     /**
      * Perform a POST on the request asynchronously.
      */
-    def post[T](body: T)(implicit wrt: Writeable[T], ct: ContentTypeOf[T]): Future[Response] = prepare("POST", body).execute
+    def post[T](body: T)(implicit wrt: Writeable[T]): Future[Response] = prepare("POST", body).execute
 
     /**
      * Perform a POST on the request asynchronously.
@@ -392,12 +392,12 @@ object WS {
      * performs a POST with supplied body
      * @param consumer that's handling the response
      */
-    def postAndRetrieveStream[A, T](body: T)(consumer: ResponseHeaders => Iteratee[Array[Byte], A])(implicit wrt: Writeable[T], ct: ContentTypeOf[T]): Future[Iteratee[Array[Byte], A]] = prepare("POST", body).executeStream(consumer)
+    def postAndRetrieveStream[A, T](body: T)(consumer: ResponseHeaders => Iteratee[Array[Byte], A])(implicit wrt: Writeable[T]): Future[Iteratee[Array[Byte], A]] = prepare("POST", body).executeStream(consumer)
 
     /**
      * Perform a PUT on the request asynchronously.
      */
-    def put[T](body: T)(implicit wrt: Writeable[T], ct: ContentTypeOf[T]): Future[Response] = prepare("PUT", body).execute
+    def put[T](body: T)(implicit wrt: Writeable[T]): Future[Response] = prepare("PUT", body).execute
 
     /**
      * Perform a PUT on the request asynchronously.
@@ -409,7 +409,7 @@ object WS {
      * performs a PUT with supplied body
      * @param consumer that's handling the response
      */
-    def putAndRetrieveStream[A, T](body: T)(consumer: ResponseHeaders => Iteratee[Array[Byte], A])(implicit wrt: Writeable[T], ct: ContentTypeOf[T]): Future[Iteratee[Array[Byte], A]] = prepare("PUT", body).executeStream(consumer)
+    def putAndRetrieveStream[A, T](body: T)(consumer: ResponseHeaders => Iteratee[Array[Byte], A])(implicit wrt: Writeable[T]): Future[Iteratee[Array[Byte], A]] = prepare("PUT", body).executeStream(consumer)
 
     /**
      * Perform a DELETE on the request asynchronously.
@@ -472,9 +472,9 @@ object WS {
       request
     }
 
-    private[play] def prepare[T](method: String, body: T)(implicit wrt: Writeable[T], ct: ContentTypeOf[T]) = {
+    private[play] def prepare[T](method: String, body: T)(implicit wrt: Writeable[T]) = {
       val request = new WSRequest(method, auth, calc).setUrl(url)
-        .setHeaders(Map("Content-Type" -> Seq(ct.mimeType.getOrElse("text/plain"))) ++ headers)
+        .setHeaders(Map("Content-Type" -> Seq(wrt.contentType.getOrElse("text/plain"))) ++ headers)
         .setQueryString(queryString)
         .setBody(wrt.transform(body))
       followRedirects.map(request.setFollowRedirects(_))
