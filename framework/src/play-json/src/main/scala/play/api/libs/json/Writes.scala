@@ -29,7 +29,7 @@ import Json._
 @implicitNotFound(
   "No Json serializer found for type ${A}. Try to implement an implicit Writes or Format for this type."
 )
-trait Writes[-A] {
+trait Writes[-A] extends Serializable {
 
   /**
    * Convert the object into a JsValue
@@ -109,70 +109,70 @@ trait DefaultWrites {
   /**
    * Serializer for Int types.
    */
-  implicit object IntWrites extends Writes[Int] {
+  implicit val IntWrites: Writes[Int] = new Writes[Int] {
     def writes(o: Int) = JsNumber(o)
   }
 
   /**
    * Serializer for Short types.
    */
-  implicit object ShortWrites extends Writes[Short] {
+  implicit val ShortWrites: Writes[Short] = new Writes[Short] {
     def writes(o: Short) = JsNumber(o)
   }
 
   /**
    * Serializer for Byte types.
    */
-  implicit object ByteWrites extends Writes[Byte] {
+  implicit val ByteWrites: Writes[Byte] = new Writes[Byte] {
     def writes(o: Byte) = JsNumber(o)
   }
 
   /**
    * Serializer for Long types.
    */
-  implicit object LongWrites extends Writes[Long] {
+  implicit val LongWrites: Writes[Long] = new Writes[Long] {
     def writes(o: Long) = JsNumber(o)
   }
 
   /**
    * Serializer for Float types.
    */
-  implicit object FloatWrites extends Writes[Float] {
+  implicit val FloatWrites: Writes[Float] = new Writes[Float] {
     def writes(o: Float) = JsNumber(o)
   }
 
   /**
    * Serializer for Double types.
    */
-  implicit object DoubleWrites extends Writes[Double] {
+  implicit val DoubleWrites: Writes[Double] = new Writes[Double] {
     def writes(o: Double) = JsNumber(o)
   }
 
   /**
    * Serializer for BigDecimal types.
    */
-  implicit object BigDecimalWrites extends Writes[BigDecimal] {
+  implicit val BigDecimalWrites: Writes[BigDecimal] = new Writes[BigDecimal] {
     def writes(o: BigDecimal) = JsNumber(o)
   }
 
   /**
    * Serializer for Boolean types.
    */
-  implicit object BooleanWrites extends Writes[Boolean] {
+  implicit val BooleanWrites: Writes[Boolean] = new Writes[Boolean] {
     def writes(o: Boolean) = JsBoolean(o)
   }
 
   /**
    * Serializer for String types.
    */
-  implicit object StringWrites extends Writes[String] {
+  implicit val StringWrites: Writes[String] = new Writes[String] {
     def writes(o: String) = JsString(o)
   }
 
   /**
    * Serializer for Jackson JsonNode
    */
-  implicit object JsonNodeWrites extends Writes[JsonNode] {
+  implicit val JsonNodeWrites: Writes[JsonNode] = new Writes[JsonNode] {
     def writes(o: JsonNode): JsValue = JacksonJson.jsonNodeToJsValue(o)
   }
 
@@ -200,7 +200,7 @@ trait DefaultWrites {
   /**
    * Serializer for JsValues.
    */
-  implicit object JsValueWrites extends Writes[JsValue] {
+  implicit val JsValueWrites: Writes[JsValue] = new Writes[JsValue] {
     def writes(o: JsValue) = o
   }
 
@@ -225,7 +225,7 @@ trait DefaultWrites {
   /**
    * Default Serializer java.util.Date -> JsNumber(d.getTime (nb of ms))
    */
-  implicit object DefaultDateWrites extends Writes[java.util.Date] {
+  implicit val DefaultDateWrites: Writes[java.util.Date] = new Writes[java.util.Date] {
     def writes(d: java.util.Date): JsValue = JsNumber(d.getTime)
   }
 
@@ -412,7 +412,7 @@ trait DefaultWrites {
   /**
    * Default Serializer org.joda.time.DateTime -> JsNumber(d.getMillis (nb of ms))
    */
-  implicit object DefaultJodaDateWrites extends Writes[org.joda.time.DateTime] {
+  implicit val DefaultJodaDateWrites: Writes[org.joda.time.DateTime] = new Writes[org.joda.time.DateTime] {
     def writes(d: org.joda.time.DateTime): JsValue = JsNumber(d.getMillis)
   }
 
@@ -428,7 +428,7 @@ trait DefaultWrites {
   /**
    * Default Serializer org.joda.time.LocalDate -> JsString(ISO8601 format (yyyy-MM-dd))
    */
-  implicit object DefaultJodaLocalDateWrites extends Writes[org.joda.time.LocalDate] {
+  implicit val DefaultJodaLocalDateWrites: Writes[org.joda.time.LocalDate] = new Writes[org.joda.time.LocalDate] {
     def writes(d: org.joda.time.LocalDate): JsValue = JsString(d.toString)
   }
 
@@ -443,7 +443,7 @@ trait DefaultWrites {
   /**
    * Default Serializer org.joda.time.LocalDate -> JsString(ISO8601 format (HH:mm:ss.SSS))
    */
-  implicit object DefaultJodaLocalTimeWrites extends Writes[org.joda.time.LocalTime] {
+  implicit val DefaultJodaLocalTimeWrites: Writes[org.joda.time.LocalTime] = new Writes[org.joda.time.LocalTime] {
     def writes(d: org.joda.time.LocalTime): JsValue = JsString(d.toString)
   }
 
@@ -458,7 +458,7 @@ trait DefaultWrites {
   /**
    * Serializer for java.util.UUID
    */
-  implicit object UuidWrites extends Writes[java.util.UUID] {
+  implicit val UuidWrites: Writes[java.util.UUID] = new Writes[java.util.UUID] {
     def writes(u: java.util.UUID) = JsString(u.toString())
   }
 

@@ -3,6 +3,8 @@
  */
 package play.api.libs.json
 
+import java.io.{ ObjectOutputStream, ByteArrayOutputStream, ByteArrayInputStream, ObjectInputStream }
+
 import org.specs2.mutable._
 import play.api.libs.json._
 import play.api.libs.json.Json._
@@ -546,6 +548,50 @@ object JsonExtensionSpec extends Specification {
       success
     }
 
+    "serializability" in {
+      val user = User(23, "tata")
+      val dog = Dog("brutus", user)
+      val toto6 = Toto6(Seq(dog))
+
+      def cycle[A](a: A) = {
+        try {
+          val os = new ByteArrayOutputStream()
+          val oos = new ObjectOutputStream(os)
+          oos.writeObject(a)
+          oos.flush()
+          val ois = new ObjectInputStream(new ByteArrayInputStream(os.toByteArray))
+          ois.readObject().asInstanceOf[A]
+        } catch {
+          case e =>
+            e.printStackTrace()
+            throw e
+        }
+      }
+
+      "readwrites" in {
+        implicit val userReads = Json.reads[User]
+        implicit val dogReads = Json.reads[Dog]
+        implicit val toto6Reads = Json.reads[Toto6]
+        implicit val userWrites = Json.writes[User]
+        implicit val dogWrites = Json.writes[Dog]
+        implicit val toto6Writes = Json.writes[Toto6]
+
+        def test[A](reads: Reads[A], writes: Writes[A], a: A) = {
+          val cycledReads = cycle(reads)
+          val cycledWrites = cycle(writes)
+
+          val json = writes.writes(a)
+          json must_== cycledWrites.writes(a)
+
+          cycledReads.reads(json) must_== reads.reads(json)
+        }
+
+        test(userReads, userWrites, user)
+        test(dogReads, dogWrites, dog)
+        test(toto6Reads, toto6Writes, toto6)
+      }
+
+    }
   }
 
 }

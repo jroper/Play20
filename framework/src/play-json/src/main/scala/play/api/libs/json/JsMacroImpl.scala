@@ -48,7 +48,7 @@ object JsMacroImpl {
     val jsPathSelect = selectTerm(jsonPkg, "JsPath")
     val readsSelect = selectTerm(jsonPkg, "Reads")
     val writesSelect = selectTerm(jsonPkg, "Writes")
-    val unliftIdent = selectTerm(functionalSyntaxPkg, "unlift")
+    val unapplyIdent = selectTerm(functionalSyntaxPkg, "unapply")
     val lazyHelperSelect = Select(utilPkg, newTypeName("LazyHelper"))
 
     val unapply = companionType.declaration(stringToTermName("unapply"))
@@ -218,7 +218,7 @@ object JsMacroImpl {
       )
 
     val unapplyMethod = Apply(
-      unliftIdent,
+      unapplyIdent,
       List(
         Select(Ident(companionSymbol), effectiveUnapply.name)
       )

@@ -5,7 +5,7 @@ package play.api.libs.functional
 
 import scala.language.higherKinds
 
-trait Alternative[M[_]] {
+trait Alternative[M[_]] extends Serializable {
 
   def app: Applicative[M]
   def |[A, B >: A](alt1: M[A], alt2: M[B]): M[B]

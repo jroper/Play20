@@ -5,7 +5,7 @@ package play.api.libs.functional
 
 import scala.language.higherKinds
 
-trait Applicative[M[_]] {
+trait Applicative[M[_]] extends Serializable {
 
   def pure[A](a: A): M[A]
   def map[A, B](m: M[A], f: A => B): M[B]

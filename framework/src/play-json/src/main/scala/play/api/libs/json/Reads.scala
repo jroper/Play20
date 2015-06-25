@@ -33,7 +33,7 @@ import reflect.ClassTag
 @implicitNotFound(
   "No Json deserializer found for type ${A}. Try to implement an implicit Reads or Format for this type."
 )
-trait Reads[A] {
+trait Reads[A] extends Serializable {
   self =>
   /**
    * Convert the JsValue into a A
@@ -203,7 +203,7 @@ trait DefaultReads extends LowPriorityDefaultReads {
   /**
    * Deserializer for Int types.
    */
-  implicit object IntReads extends Reads[Int] {
+  implicit val IntReads: Reads[Int] = new Reads[Int] {
     def reads(json: JsValue) = json match {
       case JsNumber(n) if n.isValidInt => JsSuccess(n.toInt)
       case JsNumber(n) => JsError("error.expected.int")
@@ -214,7 +214,7 @@ trait DefaultReads extends LowPriorityDefaultReads {
   /**
    * Deserializer for Short types.
    */
-  implicit object ShortReads extends Reads[Short] {
+  implicit val ShortReads: Reads[Short] = new Reads[Short] {
     def reads(json: JsValue) = json match {
       case JsNumber(n) if n.isValidShort => JsSuccess(n.toShort)
       case JsNumber(n) => JsError("error.expected.short")
@@ -225,7 +225,7 @@ trait DefaultReads extends LowPriorityDefaultReads {
   /**
    * Deserializer for Byte types.
    */
-  implicit object ByteReads extends Reads[Byte] {
+  implicit val ByteReads: Reads[Byte] = new Reads[Byte] {
     def reads(json: JsValue) = json match {
       case JsNumber(n) if n.isValidByte => JsSuccess(n.toByte)
       case JsNumber(n) => JsError("error.expected.byte")
@@ -236,7 +236,7 @@ trait DefaultReads extends LowPriorityDefaultReads {
   /**
    * Deserializer for Long types.
    */
-  implicit object LongReads extends Reads[Long] {
+  implicit val LongReads: Reads[Long] = new Reads[Long] {
     def reads(json: JsValue) = json match {
       case JsNumber(n) if n.isValidLong => JsSuccess(n.toLong)
       case JsNumber(n) => JsError("error.expected.long")
@@ -247,7 +247,7 @@ trait DefaultReads extends LowPriorityDefaultReads {
   /**
    * Deserializer for Float types.
    */
-  implicit object FloatReads extends Reads[Float] {
+  implicit val FloatReads: Reads[Float] = new Reads[Float] {
     def reads(json: JsValue) = json match {
       case JsNumber(n) => JsSuccess(n.toFloat)
       case _ => JsError("error.expected.jsnumber")
@@ -257,7 +257,7 @@ trait DefaultReads extends LowPriorityDefaultReads {
   /**
    * Deserializer for Double types.
    */
-  implicit object DoubleReads extends Reads[Double] {
+  implicit val DoubleReads: Reads[Double] = new Reads[Double] {
     def reads(json: JsValue) = json match {
       case JsNumber(n) => JsSuccess(n.toDouble)
       case _ => JsError("error.expected.jsnumber")
@@ -757,7 +757,7 @@ trait DefaultReads extends LowPriorityDefaultReads {
   /**
    * Deserializer for Boolean types.
    */
-  implicit object BooleanReads extends Reads[Boolean] {
+  implicit val BooleanReads: Reads[Boolean] = new Reads[Boolean] {
     def reads(json: JsValue) = json match {
       case JsBoolean(b) => JsSuccess(b)
       case _ => JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.jsboolean"))))
@@ -767,7 +767,7 @@ trait DefaultReads extends LowPriorityDefaultReads {
   /**
    * Deserializer for String types.
    */
-  implicit object StringReads extends Reads[String] {
+  implicit val StringReads: Reads[String] = new Reads[String] {
     def reads(json: JsValue) = json match {
       case JsString(s) => JsSuccess(s)
       case _ => JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.jsstring"))))
@@ -777,14 +777,14 @@ trait DefaultReads extends LowPriorityDefaultReads {
   /**
    * Deserializer for JsObject.
    */
-  implicit object JsObjectReads extends Reads[JsObject] {
+  implicit val JsObjectReads: Reads[JsObject] = new Reads[JsObject] {
     def reads(json: JsValue) = json match {
       case o: JsObject => JsSuccess(o)
       case _ => JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.jsobject"))))
     }
   }
 
-  implicit object JsArrayReads extends Reads[JsArray] {
+  implicit val JsArrayReads: Reads[JsArray] = new Reads[JsArray] {
     def reads(json: JsValue) = json match {
       case o: JsArray => JsSuccess(o)
       case _ => JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.jsarray"))))
@@ -794,25 +794,25 @@ trait DefaultReads extends LowPriorityDefaultReads {
   /**
    * Deserializer for JsValue.
    */
-  implicit object JsValueReads extends Reads[JsValue] {
+  implicit val JsValueReads: Reads[JsValue] = new Reads[JsValue] {
     def reads(json: JsValue) = JsSuccess(json)
   }
 
-  implicit object JsStringReads extends Reads[JsString] {
+  implicit val JsStringReads: Reads[JsString] = new Reads[JsString] {
     def reads(json: JsValue) = json match {
       case s: JsString => JsSuccess(s)
       case _ => JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.jsstring"))))
     }
   }
 
-  implicit object JsNumberReads extends Reads[JsNumber] {
+  implicit val JsNumberReads: Reads[JsNumber] = new Reads[JsNumber] {
     def reads(json: JsValue) = json match {
       case n: JsNumber => JsSuccess(n)
       case _ => JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.jsnumber"))))
     }
   }
 
-  implicit object JsBooleanReads extends Reads[JsBoolean] {
+  implicit val JsBooleanReads: Reads[JsBoolean] = new Reads[JsBoolean] {
     def reads(json: JsValue) = json match {
       case b: JsBoolean => JsSuccess(b)
       case _ => JsError(Seq(JsPath() -> Seq(ValidationError("error.expected.jsboolean"))))
@@ -822,7 +822,7 @@ trait DefaultReads extends LowPriorityDefaultReads {
   /**
    * Deserializer for Jackson JsonNode
    */
-  implicit object JsonNodeReads extends Reads[JsonNode] {
+  implicit val JsonNodeReads: Reads[JsonNode] = new Reads[JsonNode] {
     def reads(json: JsValue): JsResult[JsonNode] =
       JsSuccess(JacksonJson.jsValueToJsonNode(json))
   }
@@ -830,7 +830,7 @@ trait DefaultReads extends LowPriorityDefaultReads {
   /**
    * Deserializer for Jackson ObjectNode
    */
-  implicit object ObjectNodeReads extends Reads[ObjectNode] {
+  implicit val ObjectNodeReads: Reads[ObjectNode] = new Reads[ObjectNode] {
     def reads(json: JsValue): JsResult[ObjectNode] = {
       json.validate[JsObject] map (jo => JacksonJson.jsValueToJsonNode(jo).asInstanceOf[ObjectNode])
     }
@@ -839,7 +839,7 @@ trait DefaultReads extends LowPriorityDefaultReads {
   /**
    * Deserializer for Jackson ArrayNode
    */
-  implicit object ArrayNodeReads extends Reads[ArrayNode] {
+  implicit val ArrayNodeReads: Reads[ArrayNode] = new Reads[ArrayNode] {
     def reads(json: JsValue): JsResult[ArrayNode] = {
       json.validate[JsArray] map (ja => JacksonJson.jsValueToJsonNode(ja).asInstanceOf[ArrayNode])
     }
