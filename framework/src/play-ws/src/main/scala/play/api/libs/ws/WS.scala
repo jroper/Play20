@@ -5,6 +5,8 @@ package play.api.libs.ws
 
 import java.net.URI
 
+import akka.util.ByteString
+
 import scala.concurrent.{ Future, ExecutionContext }
 
 import java.io.File
@@ -240,7 +242,7 @@ sealed trait WSBody
  *
  * @param bytes The bytes of the body
  */
-case class InMemoryBody(bytes: Array[Byte]) extends WSBody
+case class InMemoryBody(bytes: ByteString) extends WSBody
 
 /**
  * A streamed body

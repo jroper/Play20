@@ -11,7 +11,6 @@ import play.api.{ PlayConfig, Configuration, Environment, GlobalSettings }
 import play.api.http.Status._
 import play.api.mvc._
 import play.api.routing.Router
-import play.core.actions.HeadAction
 import play.core.j.{ JavaHandler, JavaHandlerComponents }
 import play.utils.Reflect
 
@@ -123,11 +122,10 @@ class DefaultHttpRequestHandler(router: Router, errorHandler: HttpErrorHandler, 
       // add an explicit mapping in Routes
       val missingHandler: Handler = request.method match {
         case HttpVerbs.HEAD =>
-          val headAction = routeRequest(request.copy(method = HttpVerbs.GET)) match {
+          routeRequest(request.copy(method = HttpVerbs.GET)) match {
             case Some(action: EssentialAction) => action
             case _ => notFoundHandler
           }
-          new HeadAction(headAction)
         case _ =>
           notFoundHandler
       }

@@ -1,7 +1,11 @@
 package play.api.libs.streams
 
-import akka.stream.Materializer
+import java.io.{ FileInputStream, File, InputStream }
+
+import akka.stream.{ Attributes, ActorAttributes, Materializer }
+import akka.stream.io.InputStreamSource
 import akka.stream.scaladsl.{ Keep, Source, Flow, Sink }
+import akka.util.ByteString
 import org.reactivestreams._
 import play.api.libs.iteratee._
 import play.api.libs.streams.impl.SubscriberIteratee
@@ -12,6 +16,16 @@ import scala.concurrent.{ ExecutionContext, Future, Promise }
  * and from Reactive Streams' Publishers and Subscribers.
  */
 object Streams {
+
+  /**
+   * The default dispatcher used for blocking IO in Play.
+   */
+  val BlockingIoDisptacher = "play.akka.blockingIoDispatcher"
+
+  /**
+   * The attributes used for any Akka streams that work with blocking IO.
+   */
+  val BlockingIoAttributes: Attributes = ActorAttributes.dispatcher(BlockingIoDisptacher)
 
   /**
    * Adapt a Future into a Publisher. For a successful Future the
@@ -193,4 +207,33 @@ object Streams {
       }
     }
   }
+
+  /**
+   * Convert the given input stream to a Akka streams source.
+   */
+  def inputStreamToSource(is: InputStream, chunkSize: Int): Source[ByteString, _] =
+    inputStreamToSource(() => is, chunkSize)
+
+  /**
+   * Convert the given input stream callback to a Akka streams source.
+   */
+  def inputStreamToSource(is: () => InputStream, chunkSize: Int = InputStreamSource.DefaultChunkSize): Source[ByteString, _] = {
+    InputStreamSource(is, chunkSize)
+      .withAttributes(ActorAttributes.dispatcher(BlockingIoDisptacher))
+  }
+
+  /**
+   * Convert the given File to a Akka streams source.
+   */
+  def fileToSource(file: File, chunkSize: Int = InputStreamSource.DefaultChunkSize): Source[ByteString, _] = {
+    inputStreamToSource(() => new FileInputStream(file), chunkSize)
+  }
+
+  /**
+   * Convert the resource from the given classloader to a Akka streams source.
+   */
+  def resourceToSource(classLoader: ClassLoader, name: String, chunkSize: Int = InputStreamSource.DefaultChunkSize): Source[ByteString, _] = {
+    inputStreamToSource(() => classLoader.getResourceAsStream(name), chunkSize)
+  }
+
 }

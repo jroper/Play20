@@ -4,7 +4,7 @@
 package play.it.http
 
 import java.net.Socket
-import java.io.{ InputStreamReader, BufferedReader, OutputStreamWriter }
+import java.io._
 import play.api.test.Helpers._
 import org.apache.commons.io.IOUtils
 
@@ -32,9 +32,15 @@ object BasicHttpClient {
       }
 
       if (checkClosed) {
-        val line = client.reader.readLine()
-        if (line != null) {
-          throw new RuntimeException("Unexpected data after responses received: " + line)
+        try {
+          val line = client.reader.readLine()
+          if (line != null) {
+            throw new RuntimeException("Unexpected data after responses received: " + line)
+          }
+        } catch {
+          case io: IOException =>
+          // Ignore, the reader technically *should* return null when the connection is closed, but sometimes it
+          // throws an exception.
         }
       }
 
@@ -203,6 +209,17 @@ class BasicHttpClient(port: Int) {
         throw new RuntimeException(
           s"Exception while reading response $responseDesc ${e.getClass.getName}: ${e.getMessage}", e)
     }
+  }
+
+  private def consumeRemaining(reader: BufferedReader): String = {
+    val writer = new StringWriter()
+    try {
+      IOUtils.copy(reader, writer)
+    } catch {
+      case io: IOException =>
+      // Ignore, sometimes the reader will throw an exception instead of returning end of input
+    }
+    writer.toString
   }
 
   def close() = {

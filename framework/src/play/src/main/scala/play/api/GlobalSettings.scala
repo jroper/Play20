@@ -11,7 +11,6 @@ import play.core.j
 
 import scala.concurrent.Future
 import play.api.http._
-import play.core.actions.HeadAction
 import play.api.http.Status._
 
 /**
@@ -116,11 +115,10 @@ trait GlobalSettings {
       // add an explicit mapping in Routes
       val missingHandler: Handler = request.method match {
         case HttpVerbs.HEAD =>
-          val headAction = onRouteRequest(request.copy(method = HttpVerbs.GET)) match {
+          onRouteRequest(request.copy(method = HttpVerbs.GET)) match {
             case Some(action: EssentialAction) => action
             case None => notFoundHandler
           }
-          new HeadAction(headAction)
         case _ =>
           notFoundHandler
       }
