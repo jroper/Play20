@@ -54,7 +54,8 @@ object BuildSettings {
     resolvers ++= Seq(
       "Scalaz Bintray Repo" at "https://dl.bintray.com/scalaz/releases",
       Resolver.typesafeRepo("releases"),
-      Resolver.typesafeIvyRepo("releases")
+      Resolver.typesafeIvyRepo("releases"),
+      Resolver.mavenLocal
     ),
     fork in Test := true,
     parallelExecution in Test := false,

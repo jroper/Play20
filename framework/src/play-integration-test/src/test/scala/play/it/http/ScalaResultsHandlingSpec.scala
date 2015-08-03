@@ -197,7 +197,7 @@ trait ScalaResultsHandlingSpec extends PlaySpecification with WsTestClient with 
     ) { port =>
         val response = BasicHttpClient.makeRequests(port)(
           BasicRequest("GET", "/", "HTTP/1.0", Map(), "")
-        )(0)
+        ).head
         response.status must_== HTTP_VERSION_NOT_SUPPORTED
         response.body must beLeft("The response to this request is chunked and hence requires HTTP 1.1 to be sent, but this is a HTTP 1.0 request.")
       }

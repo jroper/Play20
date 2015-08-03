@@ -135,14 +135,13 @@ object Dependencies {
     javaTestDeps
 
   val netty = Seq(
-    "io.netty"           % "netty"                 % "3.10.4.Final",
-    "com.typesafe.netty" % "netty-http-pipelining" % "1.1.4"
+    "com.typesafe.netty" % "netty-reactive-streams-http" % "1.0.0-SNAPSHOT"
   ) ++ specsBuild.map(_ % Test)
 
   val nettyUtilsDependencies = slf4j
 
   val akkaHttp = Seq(
-    "com.typesafe.akka" %% "akka-http-core-experimental" % "1.0-RC4"
+    "com.typesafe.akka" %% "akka-http-core-experimental" % "1.0"
   )
 
   val routesCompilerDependencies =  Seq(
@@ -239,7 +238,7 @@ object Dependencies {
 
   val streamsDependencies = Seq(
     "org.reactivestreams" % "reactive-streams" % "1.0.0",
-    "com.typesafe.akka" %% "akka-stream-experimental" % "1.0-RC4",
+    "com.typesafe.akka" %% "akka-stream-experimental" % "1.0",
     scalaJava8Compat
   ) ++ specsBuild.map(_ % "test") ++ javaTestDeps
 
@@ -252,7 +251,7 @@ object Dependencies {
 
   val scalacheckDependencies = Seq(
     "org.specs2"     %% "specs2-scalacheck" % specsVersion % Test,
-    "org.scalacheck" %% "scalacheck"        % "1.12.4"     % Test
+    "org.scalacheck" %% "scalacheck"        % "1.12.2"     % Test
   )
 
   val playServerDependencies = Seq(

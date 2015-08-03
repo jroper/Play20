@@ -39,7 +39,7 @@ trait BadClientHandlingSpec extends PlaySpecification with ServerIntegrationSpec
 
       val response = BasicHttpClient.makeRequests(port)(
         BasicRequest("GET", "/" + url, "HTTP/1.1", Map(), "")
-      )(0)
+      ).head
 
       response.status must_== 414
     }
@@ -47,7 +47,7 @@ trait BadClientHandlingSpec extends PlaySpecification with ServerIntegrationSpec
     "return a 400 error on invalid URI" in withServer() { port =>
       val response = BasicHttpClient.makeRequests(port)(
         BasicRequest("GET", "/[", "HTTP/1.1", Map(), "")
-      )(0)
+      ).head
 
       response.status must_== 400
       response.body must beLeft
@@ -60,7 +60,7 @@ trait BadClientHandlingSpec extends PlaySpecification with ServerIntegrationSpec
     }) { port =>
       val response = BasicHttpClient.makeRequests(port)(
         BasicRequest("GET", "/[", "HTTP/1.1", Map(), "")
-      )(0)
+      ).head
 
       response.status must_== 400
       response.body must beLeft("Bad path: /[")

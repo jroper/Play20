@@ -3,20 +3,6 @@
  */
 package play.core.server.websocket
 
-import org.jboss.netty.handler.codec.http.HttpRequest;
-import org.jboss.netty.buffer._
-import org.jboss.netty.channel._
-import org.jboss.netty.bootstrap._
-import org.jboss.netty.channel.Channels._
-import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.channel.socket.nio._
-import org.jboss.netty.handler.stream._
-import org.jboss.netty.handler.codec.http.HttpHeaders._
-import org.jboss.netty.handler.codec.http.HttpHeaders.Names._
-import org.jboss.netty.handler.codec.http.HttpHeaders.Values._
-import org.jboss.netty.handler.codec.http.websocketx._
-
-import org.jboss.netty.channel.group._
 import java.util.concurrent._
 
 import play.core._
@@ -30,6 +16,7 @@ import java.nio.charset.Charset
 import java.security.MessageDigest
 
 object WebSocketHandshake {
+  /*
   protected def getWebSocketLocation(request: HttpRequest) = "ws://" + request.headers.get(HttpHeaders.Names.HOST) + request.getUri()
 
   def shake(ctx: ChannelHandlerContext, req: HttpRequest, bufferLimit: Long): Unit = {
@@ -59,5 +46,5 @@ object WebSocketHandshake {
       // this is what we're expecting, since handshake removed it
     }
   }
-
+ */
 }

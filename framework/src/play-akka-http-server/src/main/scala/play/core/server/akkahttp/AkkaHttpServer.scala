@@ -10,7 +10,7 @@ import java.net.InetSocketAddress
 import akka.util.ByteString
 import play.api._
 import play.api.http.DefaultHttpErrorHandler
-import play.api.libs.streams.Accumulator
+import play.api.libs.streams.{ MaterialiseOnDemandPublisher, Accumulator }
 import play.api.mvc._
 import play.core.ApplicationProvider
 import play.core.server._

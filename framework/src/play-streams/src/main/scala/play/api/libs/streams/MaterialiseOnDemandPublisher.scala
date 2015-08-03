@@ -1,11 +1,11 @@
-package play.core.server.akkahttp
+package play.api.libs.streams
 
 import akka.stream.Materializer
 import akka.stream.scaladsl.{ Sink, Source }
-import org.reactivestreams.{ Subscriber, Publisher, Subscription }
+import org.reactivestreams.{ Publisher, Subscriber, Subscription }
 import play.api.libs.concurrent.StateMachine
 
-private[akkahttp] object MaterialiseOnDemandPublisher {
+private[play] object MaterialiseOnDemandPublisher {
   sealed trait State
 
   /**
@@ -39,9 +39,9 @@ import MaterialiseOnDemandPublisher._
  *
  * If the subscriber never signals demand (ie, it just cancels), the source will never be materialised.
  *
- * This is used to work around https://github.com/akka/akka/issues/17782.
+ * This is used to work around https://github.com/akka/akka/issues/18013.
  */
-private[akkahttp] class MaterialiseOnDemandPublisher[T](source: Source[T, _])(implicit mat: Materializer) extends StateMachine[State](AwaitingDemand) with Publisher[T] {
+private[play] class MaterialiseOnDemandPublisher[T](source: Source[T, _])(implicit mat: Materializer) extends StateMachine[State](AwaitingDemand) with Publisher[T] {
 
   def subscribe(subscriber: Subscriber[_ >: T]) = {
     subscriber.onSubscribe(new ForwardingSubscription(subscriber))

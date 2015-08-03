@@ -3,7 +3,7 @@
  */
 package play.it.http
 
-import java.net.Socket
+import java.net.{ SocketTimeoutException, Socket }
 import java.io._
 import play.api.test.Helpers._
 import org.apache.commons.io.IOUtils
@@ -38,6 +38,8 @@ object BasicHttpClient {
             throw new RuntimeException("Unexpected data after responses received: " + line)
           }
         } catch {
+          case timeout: SocketTimeoutException =>
+            throw timeout
           case io: IOException =>
           // Ignore, the reader technically *should* return null when the connection is closed, but sometimes it
           // throws an exception.

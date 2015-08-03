@@ -5,25 +5,9 @@ package play.core.server.netty
 
 import scala.language.reflectiveCalls
 
-import org.jboss.netty.channel._
-import org.jboss.netty.handler.codec.http._
-import org.jboss.netty.handler.codec.http.websocketx._
-import play.core._
-import play.core.websocket._
-import play.core.server.websocket.WebSocketHandshake
-import play.api._
-import play.api.mvc.WebSocket.FrameFormatter
-import play.api.libs.iteratee._
-import play.api.libs.iteratee.Input._
-import scala.concurrent.{ Future, Promise }
-import scala.concurrent.stm._
-
-import play.core.Execution.Implicits.internalContext
-import org.jboss.netty.buffer.{ ChannelBuffers, ChannelBuffer }
-import java.util.concurrent.atomic.AtomicInteger
-
 private[server] trait WebSocketHandler {
 
+  /*
   import NettyFuture._
   import WebSocketHandler._
 
@@ -247,9 +231,9 @@ private[server] trait WebSocketHandler {
     def check = HttpHeaders.Values.WEBSOCKET.equalsIgnoreCase(req.headers().get(HttpHeaders.Names.UPGRADE))
     def getHeader(header: String) = req.headers().get(header)
   }
-
+*/
 }
 
 object WebSocketHandler {
-  private val logger = Logger(classOf[WebSocketHandler])
+  //  private val logger = Logger(classOf[WebSocketHandler])
 }
