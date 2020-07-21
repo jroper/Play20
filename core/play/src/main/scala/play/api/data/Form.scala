@@ -75,7 +75,7 @@ case class Form[T](mapping: Mapping[T], data: Map[String, String], errors: Seq[F
    * @param data Json data to submit
    * @return a copy of this form, filled with the new data
    */
-  def bind(data: JsValue): Form[T] = bind(FormUtils.fromJson(js = data))
+  def bind(data: JsValue): Form[T] = bind(FormUtils.fromJson(data))
 
   /**
    * Binds request data to this form, i.e. handles form submission.
@@ -93,7 +93,7 @@ case class Form[T](mapping: Mapping[T], data: Map[String, String], errors: Seq[F
       case body: Map[_, _]                   => body.asInstanceOf[Map[String, Seq[String]]]
       case body: MultipartFormData[_]        => body.asFormUrlEncoded
       case Right(body: MultipartFormData[_]) => body.asFormUrlEncoded
-      case body: play.api.libs.json.JsValue  => FormUtils.fromJson(js = body).mapValues(Seq(_))
+      case body: play.api.libs.json.JsValue  => FormUtils.fromJson(body).mapValues(Seq(_))
       case _                                 => Map.empty
     }
     val method = request.method.toUpperCase match {
@@ -391,21 +391,57 @@ object Form {
 }
 
 private[data] object FormUtils {
-  def fromJson(prefix: String = "", js: JsValue): Map[String, String] = js match {
-    case JsObject(fields) =>
-      val prefix2 = Option(prefix).filterNot(_.isEmpty).map(_ + ".").getOrElse("")
-      fields.iterator
-        .map { case (key, value) => fromJson(prefix2 + key, value) }
-        .foldLeft(Map.empty[String, String])(_ ++ _)
-    case JsArray(values) =>
-      values.zipWithIndex.iterator
-        .map { case (value, i) => fromJson(s"$prefix[$i]", value) }
-        .foldLeft(Map.empty[String, String])(_ ++ _)
-    case JsNull           => Map.empty
-    case JsUndefined()    => Map.empty
-    case JsBoolean(value) => Map(prefix -> value.toString)
-    case JsNumber(value)  => Map(prefix -> value.toString)
-    case JsString(value)  => Map(prefix -> value.toString)
+  def fromJson(js: JsValue): Map[String, String] = doFromJson(FromJsonRoot(js), Map.empty)
+
+  @annotation.tailrec
+  private def doFromJson(context: FromJsonContext, form: Map[String, String]): Map[String, String] = context match {
+    case FromJsonTerm => form
+    case ctx: FromJsonContextValue =>
+      // Ensure this contexts next is initialised, this prevents unbounded recursion.
+      ctx.next
+      ctx.value match {
+        case obj: JsObject if obj.fields.nonEmpty =>
+        doFromJson(FromJsonObject(ctx, obj.fields.toIndexedSeq, 0), form)
+        case JsArray(values) if values.nonEmpty =>
+          doFromJson(FromJsonArray(ctx, values, 0), form)
+        case JsBoolean(value) => doFromJson(ctx.next, form.updated(ctx.prefix, value.toString))
+        case JsNumber(value)  => doFromJson(ctx.next, form.updated(ctx.prefix, value.toString))
+        case JsString(value)  => doFromJson(ctx.next, form.updated(ctx.prefix, value.toString))
+        case _ => doFromJson(ctx.next, form)
+      }
+  }
+
+  private sealed trait FromJsonContext
+  private sealed trait FromJsonContextValue extends FromJsonContext {
+    def value: JsValue
+    def prefix: String
+    def next: FromJsonContext
+  }
+  private case object FromJsonTerm extends FromJsonContext
+  private case class FromJsonRoot(value: JsValue) extends FromJsonContextValue {
+    override def prefix = ""
+    override def next: FromJsonContext = FromJsonTerm
+  }
+  private case class FromJsonArray(parent: FromJsonContextValue, values: scala.collection.IndexedSeq[JsValue], idx: Int) extends FromJsonContextValue {
+    override def value: JsValue = values(idx)
+    override val prefix: String = s"${parent.prefix}[$idx]"
+    override lazy val next: FromJsonContext = if (idx + 1 < values.length) {
+      FromJsonArray(parent, values, idx + 1)
+    } else {
+      parent.next
+    }
+  }
+  private case class FromJsonObject(parent: FromJsonContextValue, fields: IndexedSeq[(String, JsValue)], idx: Int) extends FromJsonContextValue {
+    override def value: JsValue = fields(idx)._2
+    override val prefix: String = {
+      val sep = if (parent.prefix.isEmpty) "" else "."
+      parent.prefix + sep + fields(idx)._1
+    }
+    override lazy val next: FromJsonContext = if (idx + 1 < fields.length) {
+      FromJsonObject(parent, fields, idx + 1)
+    } else {
+      parent.next
+    }
   }
 }
 
